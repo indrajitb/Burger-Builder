@@ -16,17 +16,35 @@ const INGREDIENT_PRICES = {
 }
 class BurgerBuider extends Component {
 
+    _isMounted = false;
+
+    setMounted = () => {
+        this._isMounted = !this._isMounted;
+    }
     state = {
-        ingredients: {
-            salad: 0,
-            bacon: 0,
-            cheese: 0,
-            meat: 0
-        },
+        ingredients: null,
         totalPrice: 0,
         purchaseable: false,
         purchasing: false,
-        loading: false
+        loading: false,
+        error: false
+    }
+    
+    componentDidMount() {
+        console.log(this.props);
+        this._isMounted = true;
+        AxiosInstance.get('https://burger-builder-90db6.firebaseio.com/ingredients.json')
+        .then(response => {
+            if(this._isMounted)
+             this.setState({ingredients: response.data})
+        })
+        .catch(error => {});
+    }
+
+    componentWillUnmount() {
+        console.log('BurgerBuilder will unmount');
+        if(this._isMounted)
+         this.setState({_isMounted: false})
     }
 
     addIngredientHandler = (type) => {
@@ -41,7 +59,8 @@ class BurgerBuider extends Component {
         const oldPrice = this.state.totalPrice;
         const newPrice = oldPrice + priceAddition;
         //const newTotalPrice = this.state.totalPrice + newPrice;
-        this.setState({totalPrice: newPrice, ingredients: updatedIngredients});
+        if(this._isMounted)
+            this.setState({totalPrice: newPrice, ingredients: updatedIngredients});
         //console.log('[BurgerBuilder.js]  addIngredientHandler')
         this.updatePurchaseState(updatedIngredients);
         
@@ -61,7 +80,8 @@ class BurgerBuider extends Component {
         const oldPrice = this.state.totalPrice;
         const newPrice = oldPrice - priceDeletion;
         //const newTotalPrice = this.state.totalPrice - newPrice;
-        this.setState({totalPrice: newPrice, ingredients: updatedIngredients});
+        if(this._isMounted)
+            this.setState({totalPrice: newPrice, ingredients: updatedIngredients});
         //console.log('[BurgerBuilder.js]  deleteIngredientHandler')
         this.updatePurchaseState(updatedIngredients);
         
@@ -77,12 +97,14 @@ class BurgerBuider extends Component {
             return sum + el;
         }, 0);
 
-        this.setState({purchaseable: sum > 0});
+        if(this._isMounted)
+            this.setState({purchaseable: sum > 0});
         //console.log('[BurgerBuilder.js]  updatePurchaseState')
     }
 
     orderPurchaseHandler = () => {
-        this.setState({purchasing: true});
+        if(this._isMounted)
+            this.setState({purchasing: true});
     }
 
     purchaseCancelHandler = () => {
@@ -90,65 +112,88 @@ class BurgerBuider extends Component {
     }
 
     purchaseContinuedHandler = () => {
-        //alert('You continue!')
-        this.setState({loading: true});
-        const order = {
-            ingredients: this.state.ingredients,
-            price: this.state.totalPrice,
-            customer: {
-                name: "Indrajit",
-                address: {
-                    street: "Test",
-                    zipCode: '897656',
-                    country: 'India'
-                },
-                email: 'test@test.com'
-            },
-            deleveryMethod: 'fastest'
+        if(this._isMounted)
+         this.setState({loading: true});
+        // const order = {
+        //     ingredients: this.state.ingredients,
+        //     price: this.state.totalPrice,
+        //     customer: {
+        //         name: "Indrajit",
+        //         address: {
+        //             street: "Test",
+        //             zipCode: '897656',
+        //             country: 'India'
+        //         },
+        //         email: 'test@test.com'
+        //     },
+        //     deleveryMethod: 'fastest'
+        // }
+        // AxiosInstance.post('/orders.json', order)
+        // .then(response => {
+        //     if(this._isMounted)
+        //         this.setState({loading: false, purchasing: false});
+        // })
+        // .catch(error => {
+        //     if(this._isMounted)
+        //         this.setState({loading: false, purchasing: false, error: true});
+        // })
+
+        const queryParams = [];
+        for (let i in this.state.ingredients) {
+            queryParams.push(encodeURIComponent(i) + '=' + 
+            encodeURIComponent(this.state.ingredients[i]));
         }
-        AxiosInstance.post('/orders.json', order)
-        .then(response => {
-            this.setState({loading: false, purchasing: false});
-        })
-        .catch(error => {
-            this.setState({loading: false, purchasing: false});
-        })
+        queryParams.push('price=' + this.state.totalPrice);
+        const queryString = queryParams.join('&');
+        this.props.children.history.push({
+            pathname: "/checkout",
+            search: '?' + queryString
+        });
     }
 
     render() {
-        
         const disabledInfo = {
             ...this.state.ingredients
         };
         for(let key in disabledInfo) {
             disabledInfo[key] = disabledInfo[key] <=0;
         }
-        let orderSummary = <OrderSummary ingredients={this.state.ingredients}
-                purchaseCancelled={this.purchaseCancelHandler}
-                puchaseContinued={this.purchaseContinuedHandler} 
-                price={this.state.totalPrice}>;
-            </OrderSummary>
-            if(this.state.loading) {
-                orderSummary = <Spinner></Spinner>
-            }
-            console.log("[BurgerBuilder]" + " this.state.purchasing: " +this.state.purchasing)
-        return (
+        let orderSummary = null;
+        let burger = this.state.error ? <p>Ingredients can't be loaded</p> 
+            : <Spinner></Spinner>;
+        if(this.state.ingredients) {
+            burger = <Aux>
+                        <Burger ingredients={this.state.ingredients}></Burger>
+                        <BuildControls 
+                            ingredientAdded={this.addIngredientHandler}
+                            ingredientDeleted={this.deleteIngredientHandler}
+                            disabled={disabledInfo} 
+                            price={this.state.totalPrice}
+                            purchaseable={this.state.purchaseable}
+                            purchasing={this.orderPurchaseHandler}/>
+                    </Aux>;
 
-            <Aux>
-                <Modal show={this.state.purchasing} modalClosed={this.purchaseCancelHandler}>
-                    {orderSummary}
-                </Modal>
-                <Burger ingredients={this.state.ingredients}></Burger>
-                <BuildControls 
-                    ingredientAdded={this.addIngredientHandler}
-                    ingredientDeleted={this.deleteIngredientHandler}
-                    disabled={disabledInfo} 
-                    price={this.state.totalPrice}
-                    purchaseable={this.state.purchaseable}
-                    purchasing={this.orderPurchaseHandler}/>
-            </Aux>
-        )
+            orderSummary = <OrderSummary ingredients={this.state.ingredients}
+                            purchaseCancelled={this.purchaseCancelHandler}
+                            puchaseContinued={this.purchaseContinuedHandler} 
+                            price={this.state.totalPrice}>;
+                        </OrderSummary>
+           }
+
+           if(this.state.loading) {
+                orderSummary = <Spinner></Spinner>
+           }   
+           return (
+                <Aux>
+                    <Modal show={this.state.purchasing} 
+                        modalClosed={this.purchaseCancelHandler}>
+                        {orderSummary}
+                    </Modal>
+                    {burger}
+                </Aux>
+           )
     }
 }
+
 
 export default withErrorHandler(BurgerBuider, AxiosInstance) ;

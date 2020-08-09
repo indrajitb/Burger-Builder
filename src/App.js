@@ -2,13 +2,20 @@ import React from 'react';
 import Layout from './hoc/Layout/Layout'
 import BurgerBuilder from './containers/BurgerBuilder/BurgerBuilder'
 import classes from './App.module.css'
+import Checkout from './containers/Checkout/Checkout';
+import {Route, Switch} from 'react-router-dom';
+import Orders from './containers/Orders/Orders';
 
 function App() {
   
   return (
-    <div className={classes}>
+    <div>
       <Layout>
-        <BurgerBuilder></BurgerBuilder>
+        <Switch>
+          <Route path="/" exact component={BurgerBuilder} />
+          <Route path="/checkout" component={Checkout} />
+          <Route path="/orders" component={Orders} />
+        </Switch>
       </Layout>
     </div>
   );
