@@ -4,7 +4,7 @@ import Button from '../../UI/Button/Button'
 
 class OrderSummary extends Component {
     componentDidMount () {
-        console.log('[OrderSummary]', ' OrderSummary did mount');
+        
     }
 
     render(){
