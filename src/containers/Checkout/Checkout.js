@@ -9,13 +9,10 @@ import * as actions from '../../components/store/actions/index';
 class Checkout extends Component {
 
     checkoutCancelledHandler = () => {
-        console.log('checkoutCancelledHandler');
         this.props.history.goBack();
     }
 
     checkoutContinuedHandler = () => {
-        console.log('checkoutContinuedHandler');
-        console.log(this.props.history);
         this.props.history.replace('/checkout/contact-data');
     }
 

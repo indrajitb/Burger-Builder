@@ -106,9 +106,10 @@ class ContactData extends Component {
         const order = {
             ingredients: this.props.children.ings,
             price: this.props.children.price.toFixed(2),
-            orderData: formData
+            orderData: formData,
+            userId: this.props.children.userId
         }
-        this.props.children.onOrderBurger(order);
+        this.props.children.onOrderBurger(order, this.props.children.token);
         this.props.children.history.push("/")
     }
 
@@ -204,13 +205,15 @@ const mapStateToProps = state => {
         ings: state.burgerBuilder.ingredients,
         price: state.burgerBuilder.totalPrice,
         loading: state.order.loading,
-        purchased: state.order.purchased
+        purchased: state.order.purchased,
+        token : state.auth.token,
+        userId: state.auth.userId   
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        onOrderBurger: (orderData) => dispatch(actions.purchaseBurger(orderData))
+        onOrderBurger: (orderData, token) => dispatch(actions.purchaseBurger(orderData, token))
     }
     
 }
