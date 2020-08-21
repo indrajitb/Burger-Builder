@@ -48,7 +48,7 @@ class ContactData extends Component {
                     validation: {
                         required: true,
                         minLength: 5,
-                        maxLength: 5,
+                        maxLength: 6,
                     },
                     valid: false,
                     touched: false
@@ -104,13 +104,13 @@ class ContactData extends Component {
             formData[formElementIdentifier] = this.state.orderForm[formElementIdentifier].value;
         }
         const order = {
-            ingredients: this.props.children.ings,
-            price: this.props.children.price.toFixed(2),
+            ingredients: this.props.ings,
+            price: this.props.price.toFixed(2),
             orderData: formData,
-            userId: this.props.children.userId
+            userId: this.props.userId
         }
-        this.props.children.onOrderBurger(order, this.props.children.token);
-        this.props.children.history.push("/")
+        this.props.onOrderBurger(order, this.props.token);
+        this.props.history.push("/")
     }
 
     inputChangedHandler = (event, inputIdentifier) => {
@@ -153,8 +153,8 @@ class ContactData extends Component {
     }
 
     render() {
-        if(this.props.children.purchased) {
-            this.props.children.history.replace("/");
+        if(this.props.purchased) {
+            this.props.history.replace("/");
         }
         const formElementsArray = [];
         for (let key in this.state.orderForm) {

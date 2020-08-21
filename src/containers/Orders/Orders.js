@@ -22,20 +22,20 @@ class Orders extends Component {
         //     .catch(err => {
         //         this.setState({loading: false});
         //     })
-        this.props.children.onFetchOrders(this.props.children.token, this.props.children.userId);
+        this.props.onFetchOrders(this.props.token, this.props.userId);
     }
 
     render() {
         let orders = <Spinner />
-        if(!this.props.children.loading) {
-            if(this.props.children.orders) {
-                orders = this.props.children.orders.map(order => (
+        if(!this.props.loading) {
+            if(this.props.orders) {
+                orders = this.props.orders.map(order => (
                     <Order key={order.id}
                         ingredients={order.ingredients}
                         price={+order.price}/>))
             }
             
-            // const objects = this.props.children.orders;
+            // const objects = this.props.orders;
             // console.log(objects.length);
             // for (let key in objects){
             //     console.log( key, objects[key] );
