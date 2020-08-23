@@ -34,12 +34,7 @@ class Orders extends Component {
                         ingredients={order.ingredients}
                         price={+order.price}/>))
             }
-            
-            // const objects = this.props.orders;
-            // console.log(objects.length);
-            // for (let key in objects){
-            //     console.log( key, objects[key] );
-            // }  
+           
         }
         return (
             <div>
