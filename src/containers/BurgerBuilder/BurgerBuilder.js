@@ -74,7 +74,7 @@ export class BurgerBuilder extends Component {
                         ordered={this.purchaseHandler}
                         isAuth={this.props.isAuthenticated}
                         price={this.props.price}
-                        purchasing={this.purchaseHandler} />
+                    />
                 </Aux>
             );
             orderSummary = <OrderSummary
